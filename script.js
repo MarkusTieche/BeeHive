@@ -21,6 +21,8 @@ var Game =
     running:false,
     tutorial:true,
     progress:0,
+    level:1,
+    levelSize:4000,
 }
 
 var progressBar = document.getElementById("progressMask");
@@ -37,6 +39,15 @@ var player = document.getElementById("Player");
 
 var hive = document.getElementById("Hive");
     hive.position = {x:0,y:0};
+    hive.tweenable = new Tweenable({
+        from: {scale:1},
+        to: {scale:1.2},
+        ease:"easeOutQuad",
+        duration: 100,
+        onUpdate: ({scale}) => {
+            hive.setAttribute("transform","translate("+hive.position.x +","+hive.position.y +") scale("+scale+")");
+        }
+    });
 
 var camera = document.getElementById("Level");
     camera.velocity = {x:0,y:0};
@@ -110,6 +121,7 @@ function sceneTransition()
 
 function initLevel()
 {
+    player.style.visibility = "visible";
 
     collider.lastPos = {x:0,y:700};
     inputDiv.onmousedown = inputDiv.ontouchstart  = startGame;
@@ -131,7 +143,7 @@ function initLevel()
     }
 
     //SET HIVE
-    hive.position = {x:768/2,y:-10000};
+    hive.position = {x:768/2,y:-Game.levelSize};
     hive.setAttribute("transform","translate("+ hive.position.x+","+ hive.position.y +")");
 }
 
@@ -148,6 +160,26 @@ function resetLevel()
 
     initLevel();
     sceneTransition();
+}
+
+function finishLevel()
+{
+    if(!Game.running){return;}
+    
+    hive.tweenable.tween().then(() => hive.tweenable.tween({to:{scale:1},duration:100}));
+
+    player.style.visibility = "hidden";
+
+    player.speed = 0;
+    Game.running = false;
+
+    inputDiv.onmousedown = inputDiv.ontouchstart = null;
+    inputDiv.onmousemove = inputDiv.ontouchmove = null;
+    inputDiv.onmouseup = inputDiv.ontouchend = null;
+
+    Game.level +=1;
+    setTimeout(sceneTransition,500);
+    setTimeout(resetLevel,2000);
 }
 
 function startGame(e)
@@ -194,7 +226,7 @@ function inputMove(e)
         
         input.start = position;
 
-        input.position.x -= input.delta.x 
+        input.position.x -= input.delta.x *1.5;
         input.position.x = Math.min(Math.max( input.position.x, 50), 768-50)
 
     }
@@ -288,8 +320,10 @@ function render(time)
 
     //UPDATE CAMERA
     camera.velocity.y = ((camera.target.position.y-camera.position.y-camera.targetOffset.y))/20;
-    camera.position.y +=  camera.velocity.y;
-    camera.setAttribute("transform","translate(0,"+(-camera.position.y)+")");
+    camera.velocity.x = ((camera.target.position.x-camera.position.x-camera.targetOffset.x))/2;
+    camera.position.y =  Math.max(camera.position.y + camera.velocity.y,hive.position.y-250);
+    camera.position.x =   camera.velocity.x;
+    camera.setAttribute("transform","translate("+(-camera.position.x)+","+(-camera.position.y)+")");
 
     //COLLISION
     for (let i = 0; i < collider.children.length; i++) 
@@ -304,21 +338,29 @@ function render(time)
             collect(collider.children[i].flower);
         }
 
-        if( collider.children[i].position.y-1600 > camera.position.y)
-        {
-            //TODO:CALCUATE STEP SIZE AND PLACE ACCORDINGLY WITH RANDOM VARIATION
-            // collider.children[i].position.y -= (2500+Math.random()*-500)
-            collider.lastPos.y = collider.lastPos.y-collider.stepSize;
-            collider.children[i].position.y = collider.lastPos.y-Math.random()*200
-            collider.children[i].position.x =  Math.random()*768;
-            collider.children[i].setAttribute("transform","translate("+ collider.children[i].position.x+","+ collider.children[i].position.y +") scale("+Math.sign(Math.random()-0.5)+",1)");
+        if( camera.position.y > hive.position.y+collider.stepSize*3){
 
-            placeFlower(collider.children[i]);
+            if( collider.children[i].position.y-1600 > camera.position.y)
+                {
+                    //TODO:CALCUATE STEP SIZE AND PLACE ACCORDINGLY WITH RANDOM VARIATION
+                    // collider.children[i].position.y -= (2500+Math.random()*-500)
+                    collider.lastPos.y = collider.lastPos.y-collider.stepSize;
+                    collider.children[i].position.y = collider.lastPos.y-Math.random()*200
+                    collider.children[i].position.x =  Math.random()*768;
+                    collider.children[i].setAttribute("transform","translate("+ collider.children[i].position.x+","+ collider.children[i].position.y +") scale("+Math.sign(Math.random()-0.5)+",1)");
+
+                    placeFlower(collider.children[i]);
+                }
         }
 
         //UPDATE FLOWER (SIN)
         // collider.children[i].flower.position.y += Math.sin((i+1)*runningTime*.03);
         // collider.children[i].flower.setAttribute("transform","translate("+ collider.children[i].flower.position.x+","+ collider.children[i].flower.position.y +")");
+    }
+
+    if(collisionCheck(hive,150))
+    {
+        finishLevel(hive);
     }
 
 
