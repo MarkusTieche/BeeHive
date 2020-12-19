@@ -36,7 +36,7 @@ var player = document.getElementById("Player");
     // player.shadow =  document.getElementById("Player");
 
 var hive = document.getElementById("Hive");
-    hive.position = {x:768/2,y:-10000};
+    hive.position = {x:0,y:0};
 
 var camera = document.getElementById("Level");
     camera.velocity = {x:0,y:0};
@@ -48,12 +48,14 @@ var bgLoop = document.getElementById("bgLoop");
 
 var collider = document.getElementById("Collider");
     collider.lastPos = {x:0,y:0};
+    collider.stepSize = 400;
 var trees =  document.getElementById("trees");
 
 var collectables =  document.getElementById("Collectables");
 var flower = document.getElementById("flower");
 
 var transition = document.getElementById("Transition");
+    transition.style.display = "none";
     transition.mask = document.getElementById("transitionMask");
     transition.tweenable = new Tweenable({
         from: {scale:80},
@@ -70,8 +72,19 @@ var transition = document.getElementById("Transition");
 init(); 
 function init()
 {
-    transition.style.display = "none";
     // var scale=.5;
+
+    //ADD TREES
+    for (let i = 0; i < 5; i++) {
+
+        var clone = trees.children[0].cloneNode(true);
+
+            clone.flower = flower.cloneNode(true);
+            collectables.appendChild(clone.flower);
+            collider.appendChild(clone);
+
+    }
+
     initLevel();
     animate();  
 
@@ -98,36 +111,33 @@ function sceneTransition()
 function initLevel()
 {
 
+    collider.lastPos = {x:0,y:700};
     inputDiv.onmousedown = inputDiv.ontouchstart  = startGame;
+    
+    //SET OBSTACLES
+    for (let i = 0; i < collider.children.length; i++) 
+    {
+        // collider.children[i].position = {x:Math.random()*768,y:collider.lastPos.y-(100+Math.random()*500)};
+        collider.children[i].position = {x:Math.random()*768,y:collider.lastPos.y-(collider.children.length*collider.stepSize)+i*collider.stepSize};
+        collider.children[i].setAttribute("transform","translate("+ collider.children[i].position.x+","+ collider.children[i].position.y +") scale("+Math.sign(Math.random()-0.5)+",1)");
+        placeFlower(collider.children[i]);
+    }
+    collider.lastPos.y = collider.children[0].position.y;
 
-
-    //ADD TREES
-    var y = -1000;
-    for (let i = 0; i < 4; i++) {
-
-        var clone = trees.children[0].cloneNode(true);
-            clone.position = {x:Math.random()*768,y:y-(100+Math.random()*500)};
-            clone.setAttribute("transform","translate("+ clone.position.x+","+ clone.position.y +") scale("+Math.sign(Math.random()-0.5)+",1)");
-
-            clone.flower = flower.cloneNode(true);
-            collectables.appendChild(clone.flower);
-
-            placeFlower(clone)
-
-            collider.appendChild(clone);
-
-            y += 500;
+    //SET BG
+    for (let i = 0; i < bgLoop.children.length; i++) 
+    {
+        bgLoop.children[i].setAttribute('y',Number(500*i));
     }
 
-
+    //SET HIVE
+    hive.position = {x:768/2,y:-10000};
     hive.setAttribute("transform","translate("+ hive.position.x+","+ hive.position.y +")");
 }
 
 function resetLevel()
 {
-    inputDiv.onmousedown = inputDiv.ontouchstart  = startGame;
 
-    hive.setAttribute("transform","translate("+ hive.position.x+","+ hive.position.y +")");
     player.position = {x:viewBox.width/2,y:viewBox.height-400};
     camera.position = {x:0,y:0};
     Game.tutorial = true;
@@ -135,11 +145,8 @@ function resetLevel()
     tutorialFinger.style.visibility = "visible";
     player.speed = 8;
 
-    for (let i = 0; i < bgLoop.children.length; i++) 
-    {
-        bgLoop.children[i].setAttribute('y',Number(500*i));
-    }
 
+    initLevel();
     sceneTransition();
 }
 
@@ -212,7 +219,6 @@ function crash(collider)
     if(!Game.running){return;}
     player.speed = 0;
     Game.running = false;
-    console.log(Math.sign(collider.position.y-player.position.y))
     player.velocity.y = player.velocity.y*Math.sign(collider.position.y-player.position.y);
     input.position.x = player.position.x+player.velocity.x*-10;
 
@@ -298,11 +304,12 @@ function render(time)
             collect(collider.children[i].flower);
         }
 
-        if( collider.children[i].position.y-1400 > camera.position.y)
+        if( collider.children[i].position.y-1600 > camera.position.y)
         {
             //TODO:CALCUATE STEP SIZE AND PLACE ACCORDINGLY WITH RANDOM VARIATION
             // collider.children[i].position.y -= (2500+Math.random()*-500)
-            collider.children[i].position.y -= 2000;
+            collider.lastPos.y = collider.lastPos.y-collider.stepSize;
+            collider.children[i].position.y = collider.lastPos.y-Math.random()*200
             collider.children[i].position.x =  Math.random()*768;
             collider.children[i].setAttribute("transform","translate("+ collider.children[i].position.x+","+ collider.children[i].position.y +") scale("+Math.sign(Math.random()-0.5)+",1)");
 
