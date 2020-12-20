@@ -93,6 +93,7 @@ var transition = document.getElementById("Transition");
     });
 
 var particles;
+var particlePath;
 
 init(); 
 function init()
@@ -117,6 +118,9 @@ function init()
         particle.setAttribute('visibility', 'hidden');
 
     particles = new particleSystem(document.getElementById("Particle"),particle,20);
+    particle.setAttributeNS(null, 'fill', "#fff");
+    particlePath = new particleSystem(document.getElementById("ParticlePath"),particle,20);
+    particlePath.lastPos = {x:0,y:0}
     //SET GUI
     initLevel();
     animate();  
@@ -382,6 +386,8 @@ function render(time)
         player.velocity.y *= 0.93;
         player.body.velocity.y += 0.2;
         player.body.position.y += player.body.velocity.y;
+        particlePath.lastPos.x = player.position.x;
+        particlePath.lastPos.y = player.position.y;
        
         if(player.body.position.y > 0)
         {
@@ -401,6 +407,8 @@ function render(time)
 
     if(!Game.running)
     {
+        particlePath.lastPos.x = player.position.x
+        particlePath.lastPos.y = player.position.y
         //GAME NOT RUNNING SHOW TUTORIAL
         tutorialFinger.position.x = Math.sin(runningTime*.03)*300/2;
         tutorialFinger.setAttribute("transform","translate("+ tutorialFinger.position.x +",0)");
@@ -436,7 +444,16 @@ function render(time)
     Game.progress = Math.abs(camera.position.y/hive.position.y)*360;
     progressBar.setAttribute("width",Game.progress);
 
+    //PARTICLE PATH
+    if(Math.hypot(particlePath.lastPos.x-player.position.x,particlePath.lastPos.y-player.position.y)>80)
+    {
+        particlePath.spawn({position:player.position,scale:{start:10,end:5},opacity:{start:0.8,end:0.8},velocity:{x:0,y:0},life:50});
+        particlePath.lastPos.x = player.position.x;
+        particlePath.lastPos.y = player.position.y;
+    }
+
     particles.update(dt);
+    particlePath.update(dt);
 }
 // Animation loop
 function animate(){
