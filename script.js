@@ -31,10 +31,12 @@ var tutorialFinger = document.getElementById("Finger");
     tutorialFinger.position = {x:0,y:0};
 
 var player = document.getElementById("Player");
+    player.alive = true;
     player.position = {x:viewBox.width/2,y:viewBox.height-400};
     player.velocity = {x:0,y:0};
     player.rotation = 0;
     player.speed = 8;
+    player.wings = [document.getElementById("wingL"),document.getElementById("wingR")];
     // player.shadow =  document.getElementById("Player");
 
 var hive = document.getElementById("Hive");
@@ -96,9 +98,10 @@ function init()
 
     }
 
+    //SET GUI
+
     initLevel();
     animate();  
-
 }
 
 function sceneTransition()
@@ -317,6 +320,10 @@ function render(time)
     player.position.x += player.velocity.x;
     player.position.y += player.velocity.y;
     player.setAttribute("transform","translate("+player.position.x+","+player.position.y+") rotate("+player.rotation+")");
+
+    for (let i = 0; i <  player.wings.length; i++) {
+        player.wings[i].setAttribute("transform","rotate("+Math.abs(Math.sin(runningTime*.2)*300/6)*Math.sign(0.5-i)+")");
+    }
 
     //UPDATE CAMERA
     camera.velocity.y = ((camera.target.position.y-camera.position.y-camera.targetOffset.y))/20;
