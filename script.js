@@ -21,10 +21,12 @@ var Game =
     running:false,
     progress:0,
     level:1,
-    levelSize:4000,
 }
 
 var progressBar = document.getElementById("progressMask");
+    progressBar.current = 0;
+    progressBar.target = 0;
+    progressBar.max = 360;
 
 var tutorialFinger = document.getElementById("Finger");
     tutorialFinger.position = {x:0,y:0};
@@ -84,7 +86,7 @@ var transition = document.getElementById("Transition");
     transition.mask = document.getElementById("transitionMask");
     transition.tweenable = new Tweenable({
         from: {scale:80},
-        to: {scale:1},
+        to: {scale:1.5},
         ease:"easeOutQuad",
         duration: 1000,
         onUpdate: ({scale}) => {
@@ -134,13 +136,14 @@ function sceneTransition()
         transition.style.display = "block";
         transition.mask.setAttribute("transform","translate("+768*0.5 +","+1280*0.5 +") scale("+80+")");
         transition.tweenable.tween().then(()=>{ transition.mask.style.display = "none";});
+       
     }
     else
     {
         //FADE OUT
-        transition.mask.style.display = "block";
-        transition.mask.setAttribute("transform","translate("+768*0.5 +","+1280*0.5 +") scale("+1+")");
+        transition.mask.setAttribute("transform","translate("+768*0.5 +","+1280*0.5 +") scale("+1.5+")");
         transition.tweenable.tween({to:{scale:80},duration:1000}).then(()=>{ transition.style.display = "none";});
+        transition.mask.style.display = "block";
     }   
 }
 
@@ -166,12 +169,17 @@ function initLevel()
     //SET BG
     for (let i = 0; i < bgLoop.children.length; i++) 
     {
-        bgLoop.children[i].setAttribute('y',Number(500*i));
+        bgLoop.children[i].position = {x:0,y:0};
+        bgLoop.children[i].setAttribute("transform","translate("+ bgLoop.children[i].position.x+","+ bgLoop.children[i].position.y +")");
+        // bgLoop.children[i].setAttribute('y',Number(500*i));
     }
 
     //SET HIVE
-    hive.position = {x:768/2,y:-Game.levelSize};
-    hive.setAttribute("transform","translate("+ hive.position.x+","+ hive.position.y +")");
+    Game.progress = 0;
+    progressBar.current = 0;
+    progressBar.target = 0;
+    hive.position = {x:-10000,y:-Infinity};
+    hive.setAttribute("transform","translate("+ hive.position.x+","+ 0 +")");
 }
 
 function resetLevel()
@@ -286,6 +294,9 @@ function crash(collider)
     player.speed = 0;
     player.alive = false;
 
+    Game.progress = 0;
+    progressBar.target = 0;
+
     player.velocity.y = player.velocity.y*Math.sign(collider.position.y-player.position.y);
     input.position.x = player.position.x+player.velocity.x*-10;
 
@@ -301,6 +312,22 @@ function collect(flower)
 {
     if(flower.style.visibility == "hidden"){return};
     flower.style.visibility = "hidden";
+
+
+    if( Game.progress >= 360)
+    {
+        //PLACE HIVE
+        Game.progress = 0;
+        hive.position = {x:768/2,y:player.position.y-2000};
+        hive.setAttribute("transform","translate("+ hive.position.x+","+ hive.position.y +")");
+    }
+    else
+    {
+        //TODO: IMPLEMENT LEVEL HERE
+        Game.progress += 40;
+        progressBar.target +=40;
+    }
+
     
     for (let i = 0; i <6; i++) {
         particles.spawn({position:flower.position,velocity:{x:Math.random()*8-4,y:Math.random()*8-4},life:50,opacity:{start:1,end:0},scale:{start:10+Math.random()*5,end:1}})
@@ -378,6 +405,12 @@ function render(time)
             player.wings[i].setAttribute("transform","rotate("+Math.abs(Math.sin(runningTime*.2)*300/6)*Math.sign(0.5-i)+")");
         }
 
+        //OUT OF BOUNDS
+        if(player.position.y < camera.position.y-300)
+        {
+           crash(player)
+        };
+
         player.velocity.y = Math.sin((player.rotation-90)*(Math.PI/180))*player.speed;
         checkCollision();
     }
@@ -427,7 +460,7 @@ function render(time)
     //UPDATE CAMERA
     camera.velocity.y = ((camera.target.position.y-camera.position.y-camera.targetOffset.y))/20;
     camera.velocity.x = ((camera.target.position.x-camera.position.x-camera.targetOffset.x))/2;
-    camera.position.y =  Math.max(camera.position.y + camera.velocity.y,hive.position.y-250);
+    camera.position.y =  Math.max(camera.position.y + camera.velocity.y,hive.position.y-400);
     camera.position.x =   camera.velocity.x;
     camera.setAttribute("transform","translate("+(-camera.position.x)+","+(-camera.position.y)+")");
 
@@ -435,14 +468,20 @@ function render(time)
     //BG LOOP
     for (let i = 0; i < bgLoop.children.length; i++) 
     {
-       if( bgLoop.children[i].getAttribute('y')-1280 > camera.position.y)
+       if( bgLoop.children[i].getBBox().y+bgLoop.children[i].position.y-1500 > camera.position.y)
        {
-            bgLoop.children[i].setAttribute('y',Number(bgLoop.children[i].getAttribute('y'))-1500);
+            bgLoop.children[i].position.y -= 2000;
+            bgLoop.children[i].setAttribute("transform","translate("+ bgLoop.children[i].position.x+","+ bgLoop.children[i].position.y +")");
+            // bgLoop.children[i].setAttribute('y',Number(bgLoop.children[i].getAttribute('y'))-1500);
        }
     }
 
-    Game.progress = Math.abs(camera.position.y/hive.position.y)*360;
-    progressBar.setAttribute("width",Game.progress);
+    // Game.progress = Math.abs(camera.position.y/hive.position.y)*360;
+    // progressBar.setAttribute("width",Game.progress);
+
+    //UPDATE PROGRESSBAR
+    progressBar.current += Number((( progressBar.target-progressBar.current)/10).toFixed())
+    progressBar.setAttribute("width", progressBar.current);
 
     //PARTICLE PATH
     if(Math.hypot(particlePath.lastPos.x-player.position.x,particlePath.lastPos.y-player.position.y)>80)
