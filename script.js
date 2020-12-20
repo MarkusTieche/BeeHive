@@ -19,7 +19,6 @@ var input =
 var Game = 
 {
     running:false,
-    tutorial:true,
     progress:0,
     level:1,
     levelSize:4000,
@@ -32,14 +31,14 @@ var tutorialFinger = document.getElementById("Finger");
 
 var player = document.getElementById("Player");
     player.body = document.getElementById("playerBody");
-    player.body.position = {x:0,y:-30};
+    player.body.position = {x:0,y:0};
+    player.body.velocity = {x:0,y:0};
     player.alive = true;
     player.position = {x:viewBox.width/2,y:viewBox.height-400};
     player.velocity = {x:0,y:0};
     player.rotation = 0;
-    player.speed = 8;
+    player.speed = 0;
     player.wings = [document.getElementById("wingL"),document.getElementById("wingR")];
-    // player.shadow =  document.getElementById("Player");
 
 var hive = document.getElementById("Hive");
     hive.position = {x:0,y:0};
@@ -64,6 +63,17 @@ var bgLoop = document.getElementById("bgLoop");
 var collider = document.getElementById("Collider");
     collider.lastPos = {x:0,y:0};
     collider.stepSize = 400;
+    collider.current = null;
+    collider.tweenable  =  new Tweenable({
+        from: {scale:1},
+        to: {scale:1.1},
+        ease:"easeOutQuad",
+        duration: 100,
+        onUpdate: ({scale}) => {
+            collider.current.children[2].setAttribute("transform","scale("+scale+")");
+            collider.current.children[3].setAttribute("transform","scale("+scale+")");
+        }
+    });
 var trees =  document.getElementById("trees");
 
 var collectables =  document.getElementById("Collectables");
@@ -82,7 +92,7 @@ var transition = document.getElementById("Transition");
         }
     });
 
-
+var particles;
 
 init(); 
 function init()
@@ -97,11 +107,11 @@ function init()
             clone.flower = flower.cloneNode(true);
             collectables.appendChild(clone.flower);
             collider.appendChild(clone);
-
     }
 
-    //SET GUI
 
+    particles = new particleSystem(document.getElementById("Particles"));
+    //SET GUI
     initLevel();
     animate();  
 }
@@ -127,6 +137,7 @@ function sceneTransition()
 function initLevel()
 {
     player.style.visibility = "visible";
+    player.body.position = {x:0,y:-30};
     player.body.setAttribute("transform","translate("+  player.body.position.x+","+  player.body.position.y +")");
 
     collider.lastPos = {x:0,y:700};
@@ -157,11 +168,14 @@ function resetLevel()
 {
 
     player.position = {x:viewBox.width/2,y:viewBox.height-400};
+
+    input.position.x = player.position.x;
     camera.position = {x:0,y:0};
-    Game.tutorial = true;
     Game.running = false;
+    player.alive = true;
+
     tutorialFinger.style.visibility = "visible";
-    player.speed = 8;
+    player.speed = 0;
 
 
     initLevel();
@@ -170,14 +184,13 @@ function resetLevel()
 
 function finishLevel()
 {
-    if(!Game.running){return;}
-    
+    console.log("finish")
     hive.tweenable.tween().then(() => hive.tweenable.tween({to:{scale:1},duration:100}));
 
     player.style.visibility = "hidden";
 
     player.speed = 0;
-    Game.running = false;
+    player.alive = false;
 
     inputDiv.onmousedown = inputDiv.ontouchstart = null;
     inputDiv.onmousemove = inputDiv.ontouchmove = null;
@@ -192,7 +205,8 @@ function startGame(e)
 {
     tutorialFinger.style.visibility = "hidden";
     Game.running = true;
-    Game.tutorial = false;
+
+    player.speed = 8;
     inputDown(e)
     //ENABLE INPU
     inputDiv.onmousedown = inputDiv.ontouchstart = inputDown;
@@ -254,9 +268,10 @@ function collisionCheck(node,radius)
 
 function crash(collider)
 {
-    if(!Game.running){return;}
+    console.log("crash")
     player.speed = 0;
-    Game.running = false;
+    player.alive = false;
+
     player.velocity.y = player.velocity.y*Math.sign(collider.position.y-player.position.y);
     input.position.x = player.position.x+player.velocity.x*-10;
 
@@ -264,13 +279,13 @@ function crash(collider)
     inputDiv.onmousemove = inputDiv.ontouchmove = null;
     inputDiv.onmouseup = inputDiv.ontouchend = null;
 
-
-    setTimeout(sceneTransition,500);
-    setTimeout(resetLevel,2000);
+    setTimeout(sceneTransition,1000);
+    setTimeout(resetLevel,2500);
 }
 
 function collect(flower)
 {
+    if(flower.style.visibility == "hidden"){return};
     flower.style.visibility = "hidden";
 }
 
@@ -286,60 +301,16 @@ function placeFlower(tree)
     tree.flower.style.visibility = "visible";
 }
 
-function render(time)
+function checkCollision()
 {
-    //BASIC
-    dt = (time-lastTick)*.06;
-    lastTick = time;
-    runningTime += dt;
-    
-    debugFPS.innerHTML = Math.ceil(60/dt);
-
-    //GAME
-    if(!Game.running)
-    {
-        if(Game.tutorial)
-        {
-            tutorialFinger.position.x = Math.sin(runningTime*.03)*300/2;
-            tutorialFinger.setAttribute("transform","translate("+ tutorialFinger.position.x +",0)");
-            input.position.x = tutorialFinger.position.x+viewBox.width/2
-        }
-        // player.rotation = (tutorialFinger.position.x)/5;
-        player.velocity.y *=0.9;
-    }
-    else
-    {
-        if(!Game.tutorial)
-        {
-            player.velocity.y = Math.sin( (player.rotation-90)*(Math.PI/180))*player.speed;
-        }
-    }
-    
-    
-    player.velocity.x = (input.position.x-player.position.x)/30;
-    // player.velocity.y = Math.sin( (player.rotation-90)*(Math.PI/180))*player.speed;
-    player.rotation = Math.atan(player.velocity.x/10,player.velocity.y/10)*(180/Math.PI)
-    //UPDATE PLAYER
-    player.position.x += player.velocity.x;
-    player.position.y += player.velocity.y;
-    player.setAttribute("transform","translate("+player.position.x+","+player.position.y+") rotate("+player.rotation+")");
-
-    for (let i = 0; i <  player.wings.length; i++) {
-        player.wings[i].setAttribute("transform","rotate("+Math.abs(Math.sin(runningTime*.2)*300/6)*Math.sign(0.5-i)+")");
-    }
-
-    //UPDATE CAMERA
-    camera.velocity.y = ((camera.target.position.y-camera.position.y-camera.targetOffset.y))/20;
-    camera.velocity.x = ((camera.target.position.x-camera.position.x-camera.targetOffset.x))/2;
-    camera.position.y =  Math.max(camera.position.y + camera.velocity.y,hive.position.y-250);
-    camera.position.x =   camera.velocity.x;
-    camera.setAttribute("transform","translate("+(-camera.position.x)+","+(-camera.position.y)+")");
-
     //COLLISION
     for (let i = 0; i < collider.children.length; i++) 
     {
         if(collisionCheck(collider.children[i],150))
         {
+            collider.current = collider.children[i];
+            collider.tweenable.tween().then(() => collider.tweenable.tween({to:{scale:1},duration:100}));
+
             crash(collider.children[i]);
         }
 
@@ -370,6 +341,73 @@ function render(time)
     {
         finishLevel(hive);
     }
+}
+
+function render(time)
+{
+    //BASIC
+    dt = (time-lastTick)*.06;
+    lastTick = time;
+    runningTime += dt;
+    
+    debugFPS.innerHTML = Math.ceil(60/dt);
+
+    if(player.alive)
+    {
+
+        //UPDATE WINGS
+        for (let i = 0; i <  player.wings.length; i++) {
+            player.wings[i].setAttribute("transform","rotate("+Math.abs(Math.sin(runningTime*.2)*300/6)*Math.sign(0.5-i)+")");
+        }
+
+        player.velocity.y = Math.sin((player.rotation-90)*(Math.PI/180))*player.speed;
+        checkCollision();
+    }
+    else
+    {
+        player.velocity.y *= 0.93;
+        player.body.velocity.y += 0.2;
+        player.body.position.y += player.body.velocity.y;
+       
+        if(player.body.position.y > 0)
+        {
+            if(player.body.velocity.y > 1)
+            {
+                player.body.velocity.y *= -0.7;
+            }
+            else
+            {
+                player.body.velocity.y = 0;
+                player.body.position.y = 0;
+            }
+        }
+
+        player.body.setAttribute("transform","translate("+  player.body.position.x+","+  player.body.position.y +")");
+    }
+
+    if(!Game.running)
+    {
+        //GAME NOT RUNNING SHOW TUTORIAL
+        tutorialFinger.position.x = Math.sin(runningTime*.03)*300/2;
+        tutorialFinger.setAttribute("transform","translate("+ tutorialFinger.position.x +",0)");
+        input.position.x = tutorialFinger.position.x+viewBox.width/2
+    }
+
+    
+    player.velocity.x = (input.position.x-player.position.x)/30;
+    player.rotation = Math.atan(player.velocity.x/10,player.velocity.y/10)*(180/Math.PI);
+    
+    //UPDATE PLAYER
+    player.position.x += player.velocity.x;
+    player.position.y += player.velocity.y;
+    player.setAttribute("transform","translate("+player.position.x+","+player.position.y+") rotate("+player.rotation+")");
+
+    //UPDATE CAMERA
+    camera.velocity.y = ((camera.target.position.y-camera.position.y-camera.targetOffset.y))/20;
+    camera.velocity.x = ((camera.target.position.x-camera.position.x-camera.targetOffset.x))/2;
+    camera.position.y =  Math.max(camera.position.y + camera.velocity.y,hive.position.y-250);
+    camera.position.x =   camera.velocity.x;
+    camera.setAttribute("transform","translate("+(-camera.position.x)+","+(-camera.position.y)+")");
 
 
     //BG LOOP
