@@ -114,7 +114,7 @@ function init()
         particle.setAttributeNS(null, 'cx', 0);
         particle.setAttributeNS(null, 'cy', 0);
         particle.setAttributeNS(null, 'r', 10);
-        particle.setAttributeNS(null, 'fill', "#fff");
+        particle.setAttributeNS(null, 'fill', "#ede024");
         particle.setAttribute('visibility', 'hidden');
 
     particles = new particleSystem(document.getElementById("Particle"),particle,20);
