@@ -342,8 +342,6 @@ function render(time)
 
             if( collider.children[i].position.y-1600 > camera.position.y)
                 {
-                    //TODO:CALCUATE STEP SIZE AND PLACE ACCORDINGLY WITH RANDOM VARIATION
-                    // collider.children[i].position.y -= (2500+Math.random()*-500)
                     collider.lastPos.y = collider.lastPos.y-collider.stepSize;
                     collider.children[i].position.y = collider.lastPos.y-Math.random()*200
                     collider.children[i].position.x =  Math.random()*768;
