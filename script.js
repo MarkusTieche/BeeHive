@@ -109,8 +109,14 @@ function init()
             collider.appendChild(clone);
     }
 
+    var particle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+        particle.setAttributeNS(null, 'cx', 0);
+        particle.setAttributeNS(null, 'cy', 0);
+        particle.setAttributeNS(null, 'r', 10);
+        particle.setAttributeNS(null, 'fill', "#fff");
+        particle.setAttribute('visibility', 'hidden');
 
-    particles = new particleSystem(document.getElementById("Particles"));
+    particles = new particleSystem(document.getElementById("Particle"),particle,20);
     //SET GUI
     initLevel();
     animate();  
@@ -186,6 +192,10 @@ function finishLevel()
 {
     console.log("finish")
     hive.tweenable.tween().then(() => hive.tweenable.tween({to:{scale:1},duration:100}));
+    
+    for (let i = 0; i <20; i++) {
+        particles.spawn({position:hive.position,velocity:{x:Math.random()*8-4,y:Math.random()*8-4},life:50,opacity:{start:1,end:0},scale:{start:10+Math.random()*5,end:1}})
+    }
 
     player.style.visibility = "hidden";
 
@@ -287,6 +297,10 @@ function collect(flower)
 {
     if(flower.style.visibility == "hidden"){return};
     flower.style.visibility = "hidden";
+    
+    for (let i = 0; i <6; i++) {
+        particles.spawn({position:flower.position,velocity:{x:Math.random()*8-4,y:Math.random()*8-4},life:50,opacity:{start:1,end:0},scale:{start:10+Math.random()*5,end:1}})
+    }
 }
 
 function placeFlower(tree)
@@ -420,7 +434,9 @@ function render(time)
     }
 
     Game.progress = Math.abs(camera.position.y/hive.position.y)*360;
-    progressBar.setAttribute("width",Game.progress)
+    progressBar.setAttribute("width",Game.progress);
+
+    particles.update(dt);
 }
 // Animation loop
 function animate(){
