@@ -31,6 +31,8 @@ var tutorialFinger = document.getElementById("Finger");
     tutorialFinger.position = {x:0,y:0};
 
 var player = document.getElementById("Player");
+    player.body = document.getElementById("playerBody");
+    player.body.position = {x:0,y:-30};
     player.alive = true;
     player.position = {x:viewBox.width/2,y:viewBox.height-400};
     player.velocity = {x:0,y:0};
@@ -125,6 +127,7 @@ function sceneTransition()
 function initLevel()
 {
     player.style.visibility = "visible";
+    player.body.setAttribute("transform","translate("+  player.body.position.x+","+  player.body.position.y +")");
 
     collider.lastPos = {x:0,y:700};
     inputDiv.onmousedown = inputDiv.ontouchstart  = startGame;
