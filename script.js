@@ -26,7 +26,7 @@ var Game =
 var progressBar = document.getElementById("progressMask");
     progressBar.current = 0;
     progressBar.target = 0;
-    progressBar.max = 360;
+    progressBar.max = 335;
 
 var tutorialFinger = document.getElementById("Finger");
     tutorialFinger.position = {x:0,y:0};
@@ -182,6 +182,8 @@ function initLevel()
     progressBar.target = 0;
     hive.position = {x:-10000,y:-Infinity};
     hive.setAttribute("transform","translate("+ hive.position.x+","+ 0 +")");
+
+    document.getElementById("levelText").innerHTML = Game.level;
 }
 
 function resetLevel()
@@ -316,7 +318,7 @@ function collect(flower)
     flower.style.visibility = "hidden";
 
 
-    if( Game.progress >= 360)
+    if( Game.progress >= 335)
     {
         //PLACE HIVE
         Game.progress = 0;
@@ -326,8 +328,8 @@ function collect(flower)
     else
     {
         //TODO: IMPLEMENT LEVEL HERE
-        Game.progress += 40;
-        progressBar.target +=40;
+        Game.progress = Math.max(10,Game.progress+(40-Game.level));
+        progressBar.target =  Math.max(10,progressBar.target+(40-Game.level));
     }
 
     
