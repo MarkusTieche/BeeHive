@@ -43,6 +43,8 @@ var player = document.getElementById("Player");
     player.wings = [document.getElementById("wingL"),document.getElementById("wingR")];
 
 var hive = document.getElementById("Hive");
+    hive.body = document.getElementById("hiveBody")
+    hive.body.setAttribute("transform","translate("+60 +","+60+")");
     hive.position = {x:0,y:0};
     hive.tweenable = new Tweenable({
         from: {scale:1},
@@ -50,7 +52,7 @@ var hive = document.getElementById("Hive");
         ease:"easeOutQuad",
         duration: 100,
         onUpdate: ({scale}) => {
-            hive.setAttribute("transform","translate("+hive.position.x +","+hive.position.y +") scale("+scale+")");
+            hive.body.setAttribute("transform","translate("+60 +","+60 +") scale("+scale+")");
         }
     });
 
@@ -202,11 +204,11 @@ function resetLevel()
 
 function finishLevel()
 {
-    console.log("finish")
+    // console.log("finish")
     hive.tweenable.tween().then(() => hive.tweenable.tween({to:{scale:1},duration:100}));
-    
+    var pos = {x:hive.position.x+60,y:hive.position.y+60}
     for (let i = 0; i <20; i++) {
-        particles.spawn({position:hive.position,velocity:{x:Math.random()*8-4,y:Math.random()*8-4},life:50,opacity:{start:1,end:0},scale:{start:10+Math.random()*5,end:1}})
+        particles.spawn({position:pos,velocity:{x:Math.random()*8-4,y:Math.random()*8-4},life:50,opacity:{start:1,end:0},scale:{start:10+Math.random()*5,end:1}})
     }
 
     player.style.visibility = "hidden";
