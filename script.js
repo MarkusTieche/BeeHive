@@ -301,7 +301,7 @@ function crash(collider)
     Game.progress = 0;
     progressBar.target = 0;
 
-    player.velocity.y = player.velocity.y*Math.sign(collider.position.y-player.position.y);
+    player.velocity.y = (player.velocity.y*Math.sign(collider.position.y-player.position.y))/dt;
     input.position.x = player.position.x+player.velocity.x*-10;
 
     inputDiv.onmousedown = inputDiv.ontouchstart = null;
@@ -394,11 +394,23 @@ function checkCollision()
 
 function render(time)
 {
+     //SIMULATE LOW FRAMERATE
+    // if( (time-lastTick)/1000 <1/(20))
+    // // if( (time-lastTick)/1000 <1/(30+Math.random()*60))
+    // {
+    //     return;
+    // }
+
     //BASIC
     dt = (time-lastTick)*.06;
     lastTick = time;
     runningTime += dt;
-    
+
+    if(dt>5)
+    {
+        return;
+    }
+
     debugFPS.innerHTML = Math.ceil(60/dt);
 
     if(player.alive)
@@ -422,7 +434,7 @@ function render(time)
     {
         player.velocity.y *= 0.93;
         player.body.velocity.y += 0.2;
-        player.body.position.y += player.body.velocity.y;
+        player.body.position.y += player.body.velocity.y*dt;
         particlePath.lastPos.x = player.position.x;
         particlePath.lastPos.y = player.position.y;
        
@@ -453,18 +465,18 @@ function render(time)
     }
 
     
-    player.velocity.x = (input.position.x-player.position.x)/30;
+    player.velocity.x = (input.position.x-player.position.x)/(30);
     player.rotation = Math.atan(player.velocity.x/10,player.velocity.y/10)*(180/Math.PI);
     
     //UPDATE PLAYER
-    player.position.x += player.velocity.x;
-    player.position.y += player.velocity.y;
+    player.position.x += player.velocity.x*dt;
+    player.position.y += player.velocity.y*dt;
     player.setAttribute("transform","translate("+player.position.x+","+player.position.y+") rotate("+player.rotation+")");
 
     //UPDATE CAMERA
-    camera.velocity.y = ((camera.target.position.y-camera.position.y-camera.targetOffset.y))/20;
-    camera.velocity.x = ((camera.target.position.x-camera.position.x-camera.targetOffset.x))/2;
-    camera.position.y =  Math.max(camera.position.y + camera.velocity.y,hive.position.y-400);
+    camera.velocity.y = (camera.target.position.y-camera.position.y-camera.targetOffset.y)/(20);
+    camera.velocity.x = ((camera.target.position.x-camera.position.x-camera.targetOffset.x))/4;
+    camera.position.y =  Math.max(camera.position.y + camera.velocity.y*dt,hive.position.y-400);
     camera.position.x =   camera.velocity.x;
     camera.setAttribute("transform","translate("+(-camera.position.x)+","+(-camera.position.y)+")");
 
