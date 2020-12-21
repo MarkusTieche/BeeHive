@@ -293,7 +293,7 @@ function collisionCheck(node,radius)
 
 function crash(collider)
 {
-    console.log("crash")
+    // console.log("crash")
     player.speed = 0;
     player.alive = false;
 
