@@ -11,33 +11,12 @@
 </head>
 
 <body>
-  <p id="debug_FPS" class="debug" style="position: absolute;top:0px;left:5px; color:white;background:rgba(0,0,0,0.5);width:60px;text-align: center; z-index:1000;">60</p>
-
-
-	<!-- MASKS -->
-<!-- 
-	<style type="text/css">
-		#progress{clip-path: url(#Mask);}
-		#Transition{clip-path: url(#transitionMask);overflow: visible;}
-	</style>
-	<g>
-		<clipPath id="Mask">
-		<rect id="progressMask" x="186.5" y="47" width="2" height="46"/>
-		</clipPath>
-
-		<clipPath id="transitionMask">
-			<path id="transitionMask" d="M-679-679V679H679V-679H-679z M11.6,0L5.8,10H-5.8l-5.8-10l5.8-10H5.8L11.6,0z"/>
-		</clipPath>
-	</g>	
-	 -->
-	<!-- preserveAspectRatio="xMidYMax slice" -->
-	<!-- preserveAspectRatio="xMidYMax meet"  -->
+	<div id="Game">
 	<?xml version="1.0" encoding="utf-8"?>
 	<!-- Generator: Adobe Illustrator 21.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-	<svg version="1.1"  xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	<svg  version="1.1"  xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 		viewBox="0 0 768 1280" style="enable-background:new 0 0 768 1280;" xml:space="preserve">
 	<style type="text/css">
-		body{background:#58D854}
 		.st0{fill:#58D854;}
 		.st1{fill:#00A844;}
 		.st2{fill:#FFFFFF;}
@@ -280,7 +259,6 @@
 			<circle class="st25" cx="0" cy="0" r="18"/>
 		</g>
 	</g>
-
 	<g id="GUI">
 		<g id="tutorial">
 			<g id="Finger">
@@ -290,9 +268,7 @@
 			</g>
 		</g>
 	</g>
-
 	</svg>
-
 	<svg version="1.1"  xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMin meet" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 		viewBox="0 0 768 1280" style="enable-background:new 0 0 768 1280;" xml:space="preserve" style="z-index:10">
 		<style type="text/css">
@@ -333,12 +309,8 @@
 		</g>
 	</svg>
 
-
-
-	
-
-
 	<div id="inputDiv"></div>	
+</div>
 </body>
 <script src="libs/tweenr.js"></script>
 <script src="libs/particleSystem.js"></script>

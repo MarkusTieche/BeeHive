@@ -1,7 +1,6 @@
 //BASE
 var lastTick = Date.now();
 var dt = 0;
-var debugFPS = document.getElementById("debug_FPS");
 var runningTime = 0;
 let svg = document.querySelector('svg');
 var viewBox = svg.viewBox.baseVal;
@@ -327,7 +326,6 @@ function collect(flower)
     }
     else
     {
-        //TODO: IMPLEMENT LEVEL HERE
         Game.progress = Math.max(10,Game.progress+(40-Game.level));
         progressBar.target =  Math.max(10,progressBar.target+(40-Game.level));
     }
@@ -411,8 +409,6 @@ function render(time)
         return;
     }
 
-    debugFPS.innerHTML = Math.ceil(60/dt);
-
     if(player.alive)
     {
 
@@ -474,7 +470,7 @@ function render(time)
     player.setAttribute("transform","translate("+player.position.x+","+player.position.y+") rotate("+player.rotation+")");
 
     //UPDATE CAMERA
-    camera.velocity.y = (camera.target.position.y-camera.position.y-camera.targetOffset.y)/(20);
+    camera.velocity.y = (camera.target.position.y-camera.position.y-camera.targetOffset.y)/(10);
     camera.velocity.x = ((camera.target.position.x-camera.position.x-camera.targetOffset.x))/4;
     camera.position.y =  Math.max(camera.position.y + camera.velocity.y*dt,hive.position.y-400);
     camera.position.x =   camera.velocity.x;
