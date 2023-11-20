@@ -1,4 +1,2 @@
-/build
-/.vscode
-/libs
+/node_modules
 .DS_Store

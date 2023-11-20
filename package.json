@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "singlehtml": "github:MarkusTieche/singleHTML"
+  }
+}

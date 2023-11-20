@@ -234,6 +234,7 @@ function startGame(e)
     player.speed = 8;
     inputDown(e)
     //ENABLE INPU
+    
     inputDiv.onmousedown = inputDiv.ontouchstart = inputDown;
     inputDiv.onmousemove = inputDiv.ontouchmove = inputMove;
     inputDiv.onmouseup = inputDiv.ontouchend = inputUp;
@@ -251,6 +252,11 @@ return false;
 
 function inputDown(e)
 {
+    if(e.touches)//MOBILE CHROME HACK
+    {
+        e.layerX = e.touches[0].clientX;
+        e.layerY = e.touches[0].clientY;
+    }
     // input.start.x = e.layerX;
     // input.start.y = e.layerY;
     input.point.x = e.layerX; input.point.y = e.layerY;
@@ -264,9 +270,16 @@ function inputMove(e)
 {
     if(input.down)
     {
+
+        if(e.touches)//MOBILE CHROME HACK
+        {
+            e.layerX = e.touches[0].clientX
+            e.layerY = e.touches[0].clientY
+        }
+        
         input.point.x = e.layerX; input.point.y = e.layerY;
         var position  = input.point.matrixTransform(svg.getScreenCTM().inverse());
-
+        console.log(input.point)
         input.delta.x = input.start.x-position.x;
         
         input.start = position;
