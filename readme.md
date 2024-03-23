@@ -1,8 +1,8 @@
 # BeeHive 
 Vector based HTML5 mobile game. Minimized to to one HTML file (48kb).
 
-<p style="text-align: center;"><img style="width:150px;border-radius:15px;" src="media/icn_beehive.png"></p>
-<p style="text-align: center;">PLAY<br><a href="https://markustieche.github.io/BeeHive/ " >https://markustieche.github.io/BeeHive/ </a> </p>
+<p align= "center"><img style="width:150px;border-radius:15px;" src="media/icn_beehive.png"></p>
+<p align= "center">PLAY<br><a href="https://markustieche.github.io/BeeHive/ " >https://markustieche.github.io/BeeHive/ </a> </p>
 
 <br />
 <br />
